@@ -222,12 +222,18 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		// Cancel unpaid orders for KCO orders too
 		add_filter( 'woocommerce_cancel_unpaid_order', array( $this, 'cancel_unpaid_kco' ), 10, 2 );
 
-		add_action( 'woocommerce_after_calculate_totals', array( $this, 'slbd_test' ) );
+		// add_action( 'woocommerce_after_calculate_totals', array( $this, 'slbd_test' ) );
+		add_action( 'woocommerce_after_cart', array( $this, 'slbd_test' ) );
 
 	}
 
 	function slbd_test() {
-		$this->ajax_update_klarna_order();
+		global $slbd_test;
+		if ( ! $slbd_test ) {
+			$slbd_test = true;
+			$this->ajax_update_klarna_order();
+			error_log('slbd_test');
+		}
 	}
 
 	/**
@@ -1092,8 +1098,6 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 	 * @since  2.0
 	 **/
 	function ajax_update_klarna_order() {
-		global $woocommerce;
-
 		// Check if Euro is selected, get correct country
 		if ( 'EUR' == get_woocommerce_currency() && WC()->session->get( 'klarna_euro_country' ) ) {
 			$klarna_c     = strtolower( WC()->session->get( 'klarna_euro_country' ) );
@@ -1133,6 +1137,8 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		include_once( KLARNA_DIR . 'classes/class-wc-to-klarna.php' );
 		$wc_to_klarna = new WC_Gateway_Klarna_WC2K( $this->is_rest(), $this->klarna_country );
 		$cart         = $wc_to_klarna->process_cart_contents();
+
+		// error_log( var_export( $cart, true ) );
 
 		if ( 0 == count( $cart ) ) {
 			$klarna_order = null;
