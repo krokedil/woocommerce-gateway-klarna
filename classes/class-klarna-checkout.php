@@ -223,7 +223,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		add_filter( 'woocommerce_cancel_unpaid_order', array( $this, 'cancel_unpaid_kco' ), 10, 2 );
 
 		// add_action( 'woocommerce_after_calculate_totals', array( $this, 'slbd_test' ) );
-		add_action( 'woocommerce_after_cart', array( $this, 'slbd_test' ) );
+		// add_action( 'woocommerce_after_cart', array( $this, 'slbd_test' ) );
 
 	}
 

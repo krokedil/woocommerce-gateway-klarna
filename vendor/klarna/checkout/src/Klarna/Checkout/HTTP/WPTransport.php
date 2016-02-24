@@ -109,11 +109,12 @@ class Klarna_Checkout_HTTP_WPTransport implements Klarna_Checkout_HTTP_Transport
             $response = new Klarna_Checkout_HTTP_Response( $request, $request->getHeaders(), intval( $my_response['response']['code'] ), strval( $my_response['body'] ) );
         }
 
-
         // Set order URI as session value for GET request
         if ( 'POST' == $request->getMethod() ) {
-	        WC()->session->__unset( 'klarna_request_uri' );
-            WC()->session->set( 'klarna_request_uri', $my_response['headers']['location'] );
+	        if ( isset( $my_response['headers']['location'] ) ) {
+		        WC()->session->__unset( 'klarna_request_uri' );
+		        WC()->session->set( 'klarna_request_uri', $my_response['headers']['location'] );
+	        }
         }
 
         return $response;

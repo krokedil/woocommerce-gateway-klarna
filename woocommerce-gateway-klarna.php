@@ -256,13 +256,4 @@ function add_klarna_gateway( $methods ) {
 
 	return $methods;
 }
-
 add_filter( 'woocommerce_payment_gateways', 'add_klarna_gateway' );
-
-
-
-
-add_action( 'woocommerce_shipping_method_chosen', 'slbd_shipping' );
-function slbd_shipping() {
-	error_log('123');
-}
