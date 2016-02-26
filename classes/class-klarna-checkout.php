@@ -222,17 +222,19 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		// Cancel unpaid orders for KCO orders too
 		add_filter( 'woocommerce_cancel_unpaid_order', array( $this, 'cancel_unpaid_kco' ), 10, 2 );
 
-		// add_action( 'woocommerce_after_calculate_totals', array( $this, 'slbd_test' ) );
+		add_action( 'woocommerce_after_calculate_totals', array( $this, 'slbd_test' ) );
 		// add_action( 'woocommerce_after_cart', array( $this, 'slbd_test' ) );
 
 	}
 
 	function slbd_test() {
-		global $slbd_test;
-		if ( ! $slbd_test ) {
-			$slbd_test = true;
-			$this->ajax_update_klarna_order();
-			error_log('slbd_test');
+		if ( WC()->session->get( 'klarna_checkout' ) ) {
+			global $slbd_test;
+			if ( ! $slbd_test ) {
+				$slbd_test = true;
+				$this->ajax_update_klarna_order();
+				error_log( 'slbd_test' );
+			}
 		}
 	}
 
