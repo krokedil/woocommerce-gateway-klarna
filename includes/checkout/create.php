@@ -106,6 +106,8 @@ if ( $this->is_rest() ) {
 	if ( is_ssl() ) {
 		$merchantUrls['address_update'] = $address_update_uri;
 	}
+	$checkout_currency = $this->klarna_currency;
+	$merchantUrls['address_update'] = 'https://klarna-stage.shipwallet.com/v1/shipments/list?token=15206015dfcd4e498d92be76884dfd60&i18n=en-GB&currency=GBP';
 	$create['merchant_urls'] = $merchantUrls;
 } else {
 	$create['merchant']['terms_uri']        = $merchant_terms_uri;
