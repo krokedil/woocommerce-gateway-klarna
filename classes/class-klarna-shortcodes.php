@@ -431,7 +431,9 @@ class WC_Gateway_Klarna_Shortcodes {
 			// Temporarily commented out while Klarna works on this feaure and replaced by the check below
 			// that always returns true.
 			?>
-			<?php if ( 1 > 2 ) { // Just show shipping cost for Rest ?>
+			<?php
+			$chosen_shipping_method = WC()->session->get( 'chosen_shipping_methods' );
+			if ( 'klarna_shipwallet' == $chosen_shipping_method[0] ) { // Just show shipping cost if Shipwallet is selected ?>
 				<td class="kco-rightalign">
 					<?php _e( 'Shipping', 'woocommerce-gateway-klarna' ); ?>
 				</td>

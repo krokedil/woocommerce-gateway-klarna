@@ -212,10 +212,10 @@ class WC_Gateway_Klarna_WC2K {
 					'reference'        => $shipping_reference,
 					'name'             => $shipping_name,
 					'quantity'         => 1,
-					'unit_price'       => $shipping_amount,
-					'tax_rate'         => $shipping_tax_rate,
-					'total_amount'     => $shipping_amount,
-					'total_tax_amount' => $shipping_tax_amount
+					'unit_price'       => 0,
+					'tax_rate'         => 0,
+					'total_amount'     => 0,
+					'total_tax_amount' => 0
 				);
 			} else {
 				$shipping = array(

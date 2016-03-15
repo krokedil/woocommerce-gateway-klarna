@@ -1061,9 +1061,16 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 
 		global $woocommerce;
 
-		$new_method                = $_REQUEST['new_method'];
-		$chosen_shipping_methods[] = wc_clean( $new_method );
+		$new_method_id = $_REQUEST['new_method_id'];
+		$new_method = $_REQUEST['new_method'];
+		// error_log( var_export( $new_method, true ) );
+
+		WC()->session->set( 'klarna_shipwallet_shipping', $new_method );
+
+		$chosen_shipping_methods[] = wc_clean( $new_method_id );
 		$woocommerce->session->set( 'chosen_shipping_methods', $chosen_shipping_methods );
+
+		$woocommerce->shipping->reset_shipping();
 
 		if ( ! defined( 'WOOCOMMERCE_CART' ) ) {
 			define( 'WOOCOMMERCE_CART', true );
@@ -1075,7 +1082,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 
 		$this->update_or_create_local_order();
 
-		$data['new_method']  = $new_method;
+		$data['new_method']  = $new_method_id;
 		$data['widget_html'] = $this->klarna_checkout_get_kco_widget_html();
 
 		if ( WC()->session->get( 'klarna_checkout' ) ) {
@@ -1368,7 +1375,9 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 			// Temporarily commented out while Klarna works on this feaure and replaced by the check below
 			// that always returns true.
 			?>
-			<?php if ( 1 > 2 ) { // Just show shipping cost for Rest ?>
+			<?php
+			$chosen_shipping_method = WC()->session->get( 'chosen_shipping_methods' );
+			if ( 'klarna_shipwallet' == $chosen_shipping_method[0] ) { // Just show shipping cost if Shipwallet is selected ?>
 				<td>
 					<?php _e( 'Shipping', 'woocommerce-gateway-klarna' ); ?>
 				</td>

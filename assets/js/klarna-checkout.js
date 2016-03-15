@@ -508,7 +508,9 @@ jQuery(document).ready(function ($) {
 
 			api.on({
 				'shipping_option_change': function (data) {
-					new_method = data.id;
+					console.log(data);
+					new_method = data;
+					new_method_id = data.id;
 					kco_widget = $('#klarna-checkout-widget');
 
 					$.ajax(
@@ -518,6 +520,7 @@ jQuery(document).ready(function ($) {
 							dataType: 'json',
 							data: {
 								action: 'kco_iframe_shipping_option_change_cb',
+								new_method_id: new_method_id,
 								new_method: new_method,
 								nonce: kcoAjax.klarna_checkout_nonce
 							},

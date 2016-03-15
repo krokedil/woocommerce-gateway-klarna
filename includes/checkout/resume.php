@@ -161,7 +161,7 @@ try {
 				$merchantUrls['address_update'] = $address_update_uri;
 			}
 			$checkout_currency = $this->klarna_currency;
-			$merchantUrls['address_update'] = 'https://klarna-stage.shipwallet.com/v1/shipments/list?token=15206015dfcd4e498d92be76884dfd60&i18n=en-GB&currency=GBP';
+			$merchantUrls['address_update'] = 'https://klarna-stage.shipwallet.com/v1/shipments/list?token=bcb5100055f24f6497e8bc89b8dfb878&i18n=en-GB&currency=GBP';
 
 			$update['merchant_urls'] = $merchantUrls;
 		} else {
