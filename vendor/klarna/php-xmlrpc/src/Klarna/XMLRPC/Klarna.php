@@ -32,7 +32,7 @@ class Klarna
      *
      * @var string
      */
-    protected $version = 'php:api:5.0.0';
+    protected $version = 'Krokedil';
 
     /**
      * Klarna protocol identifier.
