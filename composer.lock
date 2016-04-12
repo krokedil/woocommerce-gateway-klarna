@@ -4,8 +4,8 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "d61ce6ba98e349c1a023a4e4441c3c5d",
-    "content-hash": "230fe63cc596e20aec6b61e842a78194",
+    "hash": "be0cdaf53e57fe3bad2e603635845f6a",
+    "content-hash": "2c4433e8d7a019e09ead529daf2420bf",
     "packages": [
         {
             "name": "guzzlehttp/guzzle",
@@ -206,16 +206,16 @@
         },
         {
             "name": "klarna/kco_rest",
-            "version": "v2.1.0",
+            "version": "v2.2.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/klarna/kco_rest_php.git",
-                "reference": "6e302004a8b10d0f597f4fefe1e75d0bdfac5ddb"
+                "reference": "8a2142a2ebb087bb61901d51d1bb9698790e78c5"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/klarna/kco_rest_php/zipball/6e302004a8b10d0f597f4fefe1e75d0bdfac5ddb",
-                "reference": "6e302004a8b10d0f597f4fefe1e75d0bdfac5ddb",
+                "url": "https://api.github.com/repos/klarna/kco_rest_php/zipball/8a2142a2ebb087bb61901d51d1bb9698790e78c5",
+                "reference": "8a2142a2ebb087bb61901d51d1bb9698790e78c5",
                 "shasum": ""
             },
             "require": {
@@ -250,26 +250,27 @@
             ],
             "description": "Klarna Checkout PHP SDK",
             "homepage": "http://developers.klarna.com",
-            "time": "2015-07-29 09:15:50"
+            "time": "2015-12-07 09:51:35"
         },
         {
             "name": "klarna/php-xmlrpc",
-            "version": "v4.0.0",
+            "version": "v5.0.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/klarna/php-xmlrpc.git",
-                "reference": "7fe154c30b390e544a0f4f885805ef563efbe147"
+                "reference": "c359520ce516b9172697e0355d89e000aede2934"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/klarna/php-xmlrpc/zipball/7fe154c30b390e544a0f4f885805ef563efbe147",
-                "reference": "7fe154c30b390e544a0f4f885805ef563efbe147",
+                "url": "https://api.github.com/repos/klarna/php-xmlrpc/zipball/c359520ce516b9172697e0355d89e000aede2934",
+                "reference": "c359520ce516b9172697e0355d89e000aede2934",
                 "shasum": ""
             },
             "require": {
                 "ext-curl": "*",
-                "php": ">=5.2.16",
-                "phpxmlrpc/phpxmlrpc": "~3.0"
+                "ext-xml": "*",
+                "php": ">=5.4.0",
+                "phpxmlrpc/phpxmlrpc": "~4.0"
             },
             "require-dev": {
                 "apigen/apigen": "4.0.*",
@@ -277,7 +278,7 @@
             },
             "type": "library",
             "autoload": {
-                "psr-0": {
+                "psr-4": {
                     "": "src/"
                 }
             },
@@ -293,31 +294,46 @@
             ],
             "description": "PHP SDK for Klarna's XMLRPC API",
             "homepage": "http://developers.klarna.com",
-            "time": "2015-06-02 13:11:21"
+            "time": "2016-03-16 11:55:44"
         },
         {
             "name": "phpxmlrpc/phpxmlrpc",
-            "version": "3.0.1",
+            "version": "4.0.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/gggeek/phpxmlrpc.git",
-                "reference": "490862c33009397151ac39c811b6ee8e24689692"
+                "reference": "d8e180b0ca87bf675d5fda2099d49c9d0043cd42"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/gggeek/phpxmlrpc/zipball/490862c33009397151ac39c811b6ee8e24689692",
-                "reference": "490862c33009397151ac39c811b6ee8e24689692",
+                "url": "https://api.github.com/repos/gggeek/phpxmlrpc/zipball/d8e180b0ca87bf675d5fda2099d49c9d0043cd42",
+                "reference": "d8e180b0ca87bf675d5fda2099d49c9d0043cd42",
                 "shasum": ""
             },
             "require": {
-                "php": ">=5.1.0"
+                "ext-xml": "*",
+                "php": ">=5.3.0"
+            },
+            "require-dev": {
+                "codeclimate/php-test-reporter": "dev-master",
+                "docbook/docbook-xsl": "~1.78",
+                "ext-curl": "*",
+                "ext-mbstring": "*",
+                "indeyets/pake": "~1.99",
+                "phpunit/phpunit": ">=4.0.0",
+                "phpunit/phpunit-selenium": "*",
+                "sami/sami": "~3.1"
+            },
+            "suggest": {
+                "ext-curl": "Needed for HTTPS and HTTP 1.1 support, NTLM Auth etc...",
+                "ext-mbstring": "Needed to allow reception of requests/responses in character sets other than ASCII,LATIN-1,UTF-8",
+                "ext-zlib": "Needed for sending compressed requests and receiving compressed responses, if cURL is not available"
             },
             "type": "library",
             "autoload": {
-                "classmap": [
-                    "lib/xmlrpc.inc",
-                    "lib/xmlrpcs.inc"
-                ]
+                "psr-4": {
+                    "PhpXmlRpc\\": "src/"
+                }
             },
             "notification-url": "https://packagist.org/downloads/",
             "license": [
@@ -329,20 +345,20 @@
                 "webservices",
                 "xmlrpc"
             ],
-            "time": "2015-04-19 00:17:47"
+            "time": "2016-03-27 00:17:45"
         },
         {
             "name": "react/promise",
-            "version": "v2.2.1",
+            "version": "v2.4.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/reactphp/promise.git",
-                "reference": "3b6fca09c7d56321057fa8867c8dbe1abf648627"
+                "reference": "f942da7b505d1a294284ab343d05df42d02ad6d9"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/reactphp/promise/zipball/3b6fca09c7d56321057fa8867c8dbe1abf648627",
-                "reference": "3b6fca09c7d56321057fa8867c8dbe1abf648627",
+                "url": "https://api.github.com/repos/reactphp/promise/zipball/f942da7b505d1a294284ab343d05df42d02ad6d9",
+                "reference": "f942da7b505d1a294284ab343d05df42d02ad6d9",
                 "shasum": ""
             },
             "require": {
@@ -373,7 +389,7 @@
                 }
             ],
             "description": "A lightweight implementation of CommonJS Promises/A for PHP",
-            "time": "2015-07-03 13:48:55"
+            "time": "2016-03-31 13:10:33"
         }
     ],
     "packages-dev": [],
