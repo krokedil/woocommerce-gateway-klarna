@@ -165,6 +165,15 @@ if ( sizeof( $woocommerce->cart->get_cart() ) > 0 ) {
 	update_post_meta( $local_order_id, '_klarna_order_id', $klarna_order['order_id'], true );
 	update_post_meta( $local_order_id, '_billing_country', WC()->session->get( 'klarna_country' ), true );
 
+	// Set the value for the additional checkbox
+    if ( $this->show_additional_checkbox() ) {
+        if ('yes' == $this->debug) {
+            $debug_value = ($klarna_order['merchant_requested']['additional_checkbox']) ? 'true' : 'false';
+            $this->log->add('klarna', "[checkout.php] Setting value of additional checkbox to " . $debug_value . '...');
+        }
+        $this->set_additional_checkbox_value($local_order_id, $klarna_order['merchant_requested']['additional_checkbox']);
+    }
+
 	// Set session values for Klarna order ID and Klarna order country
 	WC()->session->set( 'klarna_checkout', $sessionId );
 	WC()->session->set( 'klarna_checkout_country', WC()->customer->get_country() );

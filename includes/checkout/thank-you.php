@@ -24,9 +24,10 @@ if ( $this->debug == 'yes' ) {
 }
 
 // Shared secret
-$merchantId   = $this->klarna_eid;
-$sharedSecret = $this->klarna_secret;
-$orderUri     = $_GET['klarna_order'];
+$merchantId     = $this->klarna_eid;
+$sharedSecret   = $this->klarna_secret;
+$orderUri       = $_GET['klarna_order'];
+$local_order_id = intval( $_GET['sid'] );
 
 // Connect to Klarna
 if ( $this->is_rest() ) {
@@ -72,6 +73,15 @@ if ( $klarna_order['status'] == 'checkout_incomplete' ) {
 	exit;
 }
 
+// Check and save value of additional checkbox if applicable
+if ( $this->show_additional_checkbox() ) {
+    if ( $this->debug == 'yes' ) {
+        $debug_value = ( $klarna_order['merchant_requested']['additional_checkbox'] ) ? 'true' : 'false';
+        $this->log->add('klarna', "[thank-you.php] Setting value of additional checkbox to " . $debug_value . '...');
+    }
+    $this->set_additional_checkbox_value( $local_order_id , $klarna_order['merchant_requested']['additional_checkbox'] );
+}
+
 // Display Klarna iframe
 if ( $this->is_rest() ) {
 	$snippet = '<div>' . $klarna_order['html_snippet'] . '</div>';
@@ -79,12 +89,12 @@ if ( $this->is_rest() ) {
 	$snippet = '<div class="klarna-thank-you-snippet">' . $klarna_order['gui']['snippet'] . '</div>';
 }
 
-do_action( 'klarna_before_kco_confirmation', intval( $_GET['sid'] ) );
+do_action( 'klarna_before_kco_confirmation', $local_order_id );
 
 echo $snippet;
 
-do_action( 'klarna_after_kco_confirmation', intval( $_GET['sid'] ), $klarna_order );
-do_action( 'woocommerce_thankyou', intval( $_GET['sid'] ) );
+do_action( 'klarna_after_kco_confirmation', $local_order_id, $klarna_order );
+do_action( 'woocommerce_thankyou', $local_order_id );
 
 // Clear session and empty cart
 WC()->session->__unset( 'klarna_checkout' );

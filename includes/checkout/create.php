@@ -250,6 +250,13 @@ if ( class_exists( 'WC_Subscriptions_Cart' ) && WC_Subscriptions_Cart::cart_cont
 	}
 }
 
+// Show additional checkbox if needed.
+if ( $this->show_additional_checkbox() ) {
+	$create['options']['additional_checkbox']['text'] = $this->additional_checkbox_text();
+	$create['options']['additional_checkbox']['checked'] = $this->additional_checkbox_checked();
+	$create['options']['additional_checkbox']['required'] = $this->additional_checkbox_required();
+}
+
 if ( $this->is_rest() ) {
 	$create['order_amount']     = (int) $klarna_order_total;
 	$create['order_tax_amount'] = (int) $klarna_tax_total;

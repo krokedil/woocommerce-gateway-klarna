@@ -1813,6 +1813,65 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		return $actions;
 	}
 
+	/**
+	 * Determine whether to show additional checkbox
+	 *
+	 * @return bool
+	 */
+	function show_additional_checkbox() {
+		$show = false;
+
+		return apply_filters( 'kco_show_additional_checkbox', $show );
+	}
+
+
+	/**
+	 * Get the text for the additional text box
+	 *
+	 * @return string
+	 */
+	function additional_checkbox_text() {
+
+		$checkbox_text = __( 'Subscribe to newsletter', 'woocommerce-gateway-klarna' );
+
+		return apply_filters( 'kco_additional_checkbox_text', $checkbox_text );
+	}
+
+
+	/**
+	 * Determine whether additional checkbox is checked by default
+	 *
+	 * @return bool
+	 */
+	function additional_checkbox_checked() {
+		$checked = true;
+
+		return apply_filters( 'kco_additional_checkbox_checked', $checked );
+	}
+
+
+	/**
+	 * Determine whether the additional checkbox is required
+	 *
+	 * @return bool
+	 */
+	function additional_checkbox_required() {
+		$required = false;
+
+		return apply_filters( 'kco_additional_checkbox_required', $required );
+	}
+
+	/**
+	 * Add postmeta for the additional checkbox
+	 * 
+	 * @param int   $order_id
+     * @param bool  $checkbox_value
+	 */
+	function set_additional_checkbox_value( $order_id, $checkbox_value ) {
+		$meta_value = ( $checkbox_value ) ? '1' : '0';
+	    update_post_meta( $order_id, '_kco_additional_checkbox',  $meta_value );
+	}
+
 } // End class WC_Gateway_Klarna_Checkout
 // Extra Class for Klarna Checkout
 class WC_Gateway_Klarna_Checkout_Extra {
