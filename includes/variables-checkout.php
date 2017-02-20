@@ -330,6 +330,12 @@ if ( ! is_admin() && ! empty( $klarna_country ) ) {
 	WC()->session->set( 'klarna_country', apply_filters( 'klarna_country', $klarna_country ) );
 }
 
+// WPML
+if (defined( 'ICL_LANGUAGE_CODE' ))
+{
+ $lang = ICL_LANGUAGE_CODE;
+ $klarna_checkout_url = $klarna_checkout_url . '?lang=' . $lang . '&';
+}
 
 // Apply filters to Country and language
 $this->klarna_country             = apply_filters( 'klarna_country', $klarna_country );
