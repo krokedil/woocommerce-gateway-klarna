@@ -580,6 +580,11 @@ class WC_Gateway_Klarna_Order {
 				if (strpos($failurenote, "we cannot approve your purchase ") !== false)
 				{
 					$order->add_order_note( sprintf( __( "Klarna: Can't renew the credit reservation, Klarna will not take the risk", 'woocommerce-gateway-klarna' )));
+
+					// cancel the order and the reservation
+					$this->cancel_order( $orderid );
+					$order->update_status( 'cancelled' );
+					return;
 				}
 				elseif (strpos($failurenote, "Reservationen som du ") !== false)
 				{
