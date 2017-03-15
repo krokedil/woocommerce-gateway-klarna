@@ -983,13 +983,13 @@ class WC_Gateway_Klarna_K2WC {
 				}
 			}
 			
-			if ($preseasonal)
-				$order->update_status( 'kco-preseason' ); // Set status to Preseason KCO before completing the order.
-			else
-				$order->update_status( 'pending' ); // Set status to Pending Payment before completing the order.
+			$order->update_status( 'pending' ); // Set status to Pending Payment before completing the order.
 			
 			$order->payment_complete( $klarna_order['reservation'] );
 			delete_post_meta( $order->id, '_kco_incomplete_customer_email' );
+			
+			if ($preseasonal)
+				$order->update_status( 'kco-preseason' ); // Set status to Preseason KCO after completing the order.
 		}
 
 		return $klarna_order;
