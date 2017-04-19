@@ -446,6 +446,15 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 			'show_in_admin_status_list' => true,
 			'label_count'               => _n_noop( 'KCO preseason <span class="count">(%s)</span>', 'KCO preseason <span class="count">(%s)</span>' ),
 		) );
+		
+		register_post_status( 'wc-kco-mixed', array(
+			'label'                     => 'KCO mixed',
+			'public'                    => true,
+			'exclude_from_search'       => false,
+			'show_in_admin_all_list'    => true,
+			'show_in_admin_status_list' => true,
+			'label_count'               => _n_noop( 'KCO mixed <span class="count">(%s)</span>', 'KCO mixed <span class="count">(%s)</span>' ),
+		) );
 	}
 
 	/**
@@ -460,6 +469,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		}
 		
 		$order_statuses['wc-kco-preseason'] = 'Preseason Klarna Checkout';
+		$order_statuses['wc-kco-mixed'] = 'Mixed Klarna Checkout';
 
 		return $order_statuses;
 	}
