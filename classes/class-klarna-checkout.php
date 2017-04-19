@@ -19,7 +19,6 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 	 * @since 1.0.0
 	 */
 	public function __construct() {
-		global $woocommerce;
 		parent::__construct();
 		$this->id           = 'klarna_checkout';
 		$this->method_title = __( 'Klarna Checkout', 'woocommerce-gateway-klarna' );
@@ -195,7 +194,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		) );
 		add_filter( 'woocommerce_valid_order_statuses_for_payment', array( $this, 'kco_incomplete_payment_complete' ) );
 		// Hide "Refunded" and "KCO Incomplete" statuses for KCO orders
-		add_filter( 'wc_order_statuses', array( $this, 'remove_refunded_and_kco_incomplete' ), 1000 );
+		// add_filter( 'wc_order_statuses', array( $this, 'remove_refunded_and_kco_incomplete' ), 1000 );
 		// Hide "Manual Refund" button for KCO orders
 		add_action( 'admin_head', array( $this, 'remove_refund_manually' ) );
 		// Cancel unpaid orders for KCO orders too
@@ -381,7 +380,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 			'posts_per_page' => - 1,
 			'date_query'     => array(
 				array(
-					'before' => '1 day ago'
+					'before' => '2 days ago'
 				)
 			)
 		);
@@ -582,7 +581,6 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 				$_product = $order->get_product_from_item( $item );
 				if ( $_product->exists() && $item['qty'] ) {
 					// Get SKU or product id
-					$reference = '';
 					if ( $_product->get_sku() ) {
 						$reference = $_product->get_sku();
 					} elseif ( $_product->variation_id ) {
@@ -702,9 +700,8 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		}
 		$cart_items      = $woocommerce->cart->get_cart();
 		$updated_item    = $cart_items[ $updated_item_key ];
-		$updated_product = wc_get_product( $updated_item['product_id'] );
+
 		// Update WooCommerce cart and transient order item
-		$klarna_sid = $woocommerce->session->get( 'klarna_sid' );
 		$woocommerce->cart->set_quantity( $updated_item_key, $new_quantity );
 		$woocommerce->cart->calculate_shipping();
 		$woocommerce->cart->calculate_fees();
@@ -731,10 +728,11 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		if ( ! defined( 'WOOCOMMERCE_CART' ) ) {
 			define( 'WOOCOMMERCE_CART', true );
 		}
-		$cart_items = $woocommerce->cart->get_cart();
+
 		// Remove line item row
 		$removed_item_key = esc_attr( $_REQUEST['cart_item_key_remove'] );
 		$woocommerce->cart->remove_cart_item( $removed_item_key );
+
 		if ( sizeof( $woocommerce->cart->get_cart() ) > 0 ) {
 			$woocommerce->cart->calculate_shipping();
 			$woocommerce->cart->calculate_fees();
@@ -746,14 +744,17 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 				$woocommerce->session->__unset( 'ongoing_klarna_order' );
 			}
 		}
+
 		// This needs to be sent back to JS, so cart widget can be updated
 		$data['item_count']  = $woocommerce->cart->get_cart_contents_count();
 		$data['cart_url']    = $woocommerce->cart->get_cart_url();
 		$data['widget_html'] = $this->klarna_checkout_get_kco_widget_html();
+
 		// Update ongoing Klarna order
 		if ( WC()->session->get( 'klarna_checkout' ) ) {
 			$this->ajax_update_klarna_order();
 		}
+
 		wp_send_json_success( $data );
 		wp_die();
 	}
@@ -784,7 +785,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 			$woocommerce->cart->calculate_fees();
 			$woocommerce->cart->calculate_totals();
 			$this->update_or_create_local_order();
-			$coupon_object          = new WC_Coupon( $coupon );
+
 			$amount                 = wc_price( $woocommerce->cart->get_coupon_discount_amount( $coupon, $woocommerce->cart->display_cart_ex_tax ) );
 			$data['amount']         = $amount;
 			$data['coupon_success'] = $coupon_success;
@@ -893,7 +894,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 					'post_excerpt' => $order_note
 				);
 
-				$order_update  = wp_update_post( $order_details );
+				wp_update_post( $order_details );
 
 				if ( $this->debug == 'yes' ) {
 					$this->log->add( 'klarna', 'ORDERID: ' . $orderid );
@@ -1065,6 +1066,9 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 			} elseif ( 'dnk' == $_REQUEST['country'] ) {
 				$woocommerce->customer->set_country( 'DK' );
 				$woocommerce->customer->set_shipping_country( 'DK' );
+			} elseif ( 'nld' == $_REQUEST['country'] ) {
+				$woocommerce->customer->set_country( 'NL' );
+				$woocommerce->customer->set_shipping_country( 'NL' );
 			}
 		}
 		if ( ! defined( 'WOOCOMMERCE_CART' ) ) {
@@ -1120,29 +1124,39 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		// Check if Euro is selected, get correct country
 		if ( 'EUR' == get_woocommerce_currency() && WC()->session->get( 'klarna_euro_country' ) ) {
 			$klarna_c     = strtolower( WC()->session->get( 'klarna_euro_country' ) );
-			$eid          = $this->settings["eid_$klarna_c"];
-			$sharedSecret = $this->settings["secret_$klarna_c"];
+
+			if( in_array( strtoupper( $klarna_c ), array( 'DE', 'FI', 'NL' ) )  ) {
+				// Add correct EID & secret specific to country if the curency is EUR and the country is DE or FI.
+				$eid          = $this->settings["eid_$klarna_c"];
+				$sharedSecret = html_entity_decode ( $this->settings["secret_$klarna_c"] );
+			} else {
+				// Otherwise use the general eid and secret (filterable) if we're using EUR as currency for a global KCO checkout
+				$eid          = $this->klarna_eid;
+				$sharedSecret = html_entity_decode ( $this->klarna_secret );
+			}
+
 		} else {
 			$eid          = $this->klarna_eid;
-			$sharedSecret = $this->klarna_secret;
+			$sharedSecret = html_entity_decode ( $this->klarna_secret );
 		}
 
 		if ( $this->is_rest() ) {
 			if ( $this->testmode == 'yes' ) {
-				if ( 'gb' == $this->klarna_country || 'dk' == $this->klarna_country ) {
+				if ( in_array( strtoupper( $this->klarna_country ), apply_filters( 'klarna_is_rest_countries_eu', array( 'DK', 'GB', 'NL' ) ) ) ) {
 					$klarna_server_url = Klarna\Rest\Transport\ConnectorInterface::EU_TEST_BASE_URL;
-				} elseif ( 'us' == $this->klarna_country ) {
+				} elseif ( in_array( strtoupper( $this->klarna_country ), apply_filters( 'klarna_is_rest_countries_na', array( 'US' ) ) ) ) {
 					$klarna_server_url = Klarna\Rest\Transport\ConnectorInterface::NA_TEST_BASE_URL;
 				}
 			} else {
-				if ( 'gb' == $this->klarna_country || 'dk' == $this->klarna_country ) {
+				if ( in_array( strtoupper( $this->klarna_country ), apply_filters( 'klarna_is_rest_countries_eu', array( 'DK', 'GB', 'NL' ) ) ) ) {
 					$klarna_server_url = Klarna\Rest\Transport\ConnectorInterface::EU_BASE_URL;
-				} elseif ( 'us' == $this->klarna_country ) {
+				} elseif ( in_array( strtoupper( $this->klarna_country ), apply_filters( 'klarna_is_rest_countries_na', array( 'US' ) ) ) ) {
 					$klarna_server_url = Klarna\Rest\Transport\ConnectorInterface::NA_BASE_URL;
 				}
 			}
+			$klarna_order_id = WC()->session->get( 'klarna_checkout' );
 			$connector    = Klarna\Rest\Transport\Connector::create( $eid, $sharedSecret, $klarna_server_url );
-			$klarna_order = new \Klarna\Rest\Checkout\Order( $connector, WC()->session->get( 'klarna_checkout' ) );
+			$klarna_order = new \Klarna\Rest\Checkout\Order( $connector, $klarna_order_id );
 		} else {
 			$connector    = Klarna_Checkout_Connector::create( $sharedSecret, $this->klarna_server );
 			$klarna_order = new Klarna_Checkout_Order( $connector, WC()->session->get( 'klarna_checkout' ) );
@@ -1246,8 +1260,8 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 					// apply_filters to item price so we can filter this if needed
 					$klarna_item_price_including_tax = $cart_item['line_subtotal'] + $cart_item['line_subtotal_tax'];
 					$item_price                      = apply_filters( 'klarna_item_price_including_tax', $klarna_item_price_including_tax );
+
 					// Get SKU or product id
-					$reference = '';
 					if ( $_product->get_sku() ) {
 						$reference = $_product->get_sku();
 					} elseif ( $_product->variation_id ) {
@@ -1255,8 +1269,10 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 					} else {
 						$reference = $_product->id;
 					}
+
 					$total_amount = (int) ( $cart_item['line_total'] + $cart_item['line_tax'] ) * 100;
 					$item_price   = number_format( $item_price * 100, 0, '', '' ) / $cart_item['quantity'];
+
 					// Check if there's a discount applied
 					if ( $cart_item['line_subtotal'] > $cart_item['line_total'] ) {
 						$item_discount_rate = round( 1 - ( $cart_item['line_total'] / $cart_item['line_subtotal'] ), 2 ) * 10000;
@@ -1265,6 +1281,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 						$item_discount_rate = 0;
 						$item_discount      = 0;
 					}
+
 					if ( $this->is_rest() ) {
 						$klarna_item = array(
 							'reference'             => strval( $reference ),
@@ -1286,6 +1303,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 							'discount_rate' => $item_discount_rate
 						);
 					}
+
 					$cart[] = $klarna_item;
 				} // End if qty
 			} // End foreach
@@ -1403,14 +1421,12 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		switch ( $country ) {
 			case 'NO' :
 			case 'NB' :
-				$klarna_country  = 'NO';
 				$klarna_language = 'nb-no';
 				$klarna_currency = 'NOK';
 				$klarna_eid      = $this->eid_no;
 				$klarna_secret   = $this->secret_no;
 				break;
 			case 'FI' :
-				$klarna_country = 'FI';
 				// Check if WPML is used and determine if Finnish or Swedish is used as language
 				if ( class_exists( 'woocommerce_wpml' ) && defined( 'ICL_LANGUAGE_CODE' ) && strtoupper( ICL_LANGUAGE_CODE ) == 'SV' ) {
 					$klarna_language = 'sv-fi'; // Swedish
@@ -1423,35 +1439,30 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 				break;
 			case 'SE' :
 			case 'SV' :
-				$klarna_country  = 'SE';
 				$klarna_language = 'sv-se';
 				$klarna_currency = 'SEK';
 				$klarna_eid      = $this->eid_se;
 				$klarna_secret   = $this->secret_se;
 				break;
 			case 'DE' :
-				$klarna_country  = 'DE';
 				$klarna_language = 'de-de';
 				$klarna_currency = 'EUR';
 				$klarna_eid      = $this->eid_de;
 				$klarna_secret   = $this->secret_de;
 				break;
 			case 'AT' :
-				$klarna_country  = 'AT';
 				$klarna_language = 'de-at';
 				$klarna_currency = 'EUR';
 				$klarna_eid      = $this->eid_at;
 				$klarna_secret   = $this->secret_at;
 				break;
 			case 'GB' :
-				$klarna_country  = 'gb';
 				$klarna_language = 'en-gb';
 				$klarna_currency = 'gbp';
 				$klarna_eid      = $this->eid_uk;
 				$klarna_secret   = $this->secret_uk;
 				break;
 			default:
-				$klarna_country  = '';
 				$klarna_language = '';
 				$klarna_currency = '';
 				$klarna_eid      = '';
@@ -1467,7 +1478,8 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 	 */
 	function get_klarna_checkout_page() {
 		global $woocommerce;
-		$current_user = wp_get_current_user();
+ 		$current_user = wp_get_current_user();
+
 		// Debug
 		if ( $this->debug == 'yes' ) {
 			$this->log->add( 'klarna', 'KCO page about to render...' );
@@ -1519,6 +1531,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		$klarna_to_wc->set_klarna_debug( $this->debug );
 		$klarna_to_wc->set_klarna_test_mode( $this->testmode );
 		$klarna_to_wc->set_klarna_server( $this->klarna_server );
+		$klarna_to_wc->set_klarna_credentials_country( $this->klarna_credentials_country );
 		if ( $customer_email ) {
 			$orderid = $klarna_to_wc->prepare_wc_order( $customer_email );
 		} else {
@@ -1538,41 +1551,69 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 		if ( isset( $_GET['validate'] ) ) {
 			exit;
 		}
-		switch ( $_GET['scountry'] ) {
-			case 'SE':
-				$klarna_secret = $this->secret_se;
-				$klarna_eid    = $this->eid_se;
-				break;
-			case 'FI' :
-				$klarna_secret = $this->secret_fi;
-				$klarna_eid    = $this->eid_se;
-				break;
-			case 'NO' :
-				$klarna_secret = $this->secret_no;
-				$klarna_eid    = $this->eid_no;
-				break;
-			case 'DE' :
-				$klarna_secret = $this->secret_de;
-				$klarna_eid    = $this->eid_de;
-				break;
-			case 'AT' :
-				$klarna_secret = $this->secret_at;
-				$klarna_eid    = $this->eid_at;
-				break;
-			case 'dk' :
-				$klarna_secret = $this->secret_dk;
-				$klarna_eid    = $this->eid_dk;
-				break;
-			case 'gb' :
-				$klarna_secret = $this->secret_uk;
-				$klarna_eid    = $this->eid_uk;
-				break;
-			case 'us' :
-				$klarna_secret = $this->secret_us;
-				$klarna_eid    = $this->eid_us;
-				break;
-			default:
-				$klarna_secret = '';
+		$klarna_eid = false;
+		$klarna_secret = false;
+		
+		// Retrieve Eid & Secret from order if it exist
+		if ( isset( $_GET['sid'] ) ) {
+			$order_id = sanitize_key( $_GET['sid'] );
+			$klarna_credentials_country =  get_post_meta( $order_id, '_klarna_credentials_country', true );
+			
+			// Hack for UK/GB. We store the settings as UK but Klarna is using GB
+			if( 'gb' == strtolower( $klarna_credentials_country ) ) {
+				$klarna_credentials_country = 'uk';
+			}
+			
+			if( $klarna_credentials_country ) {
+				$klarna_credentials_country	= strtolower( $klarna_credentials_country );
+				$klarna_eid          		= $this->settings["eid_$klarna_credentials_country"];
+				$klarna_secret 				= html_entity_decode ( $this->settings["secret_$klarna_credentials_country"] );
+			}
+		}
+		
+		// If we don't get an Eid from the order then we can grab the data from the returned country
+		// @TODO - this can be removed over time since the credential country now is stored as post meta in the order.
+		if( empty( $klarna_eid ) ) {
+			switch ( $_GET['scountry'] ) {
+				case 'SE':
+					$klarna_secret = $this->secret_se;
+					$klarna_eid    = $this->eid_se;
+					break;
+				case 'FI' :
+					$klarna_secret = $this->secret_fi;
+					$klarna_eid    = $this->eid_se;
+					break;
+				case 'NO' :
+					$klarna_secret = $this->secret_no;
+					$klarna_eid    = $this->eid_no;
+					break;
+				case 'DE' :
+					$klarna_secret = $this->secret_de;
+					$klarna_eid    = $this->eid_de;
+					break;
+				case 'AT' :
+					$klarna_secret = $this->secret_at;
+					$klarna_eid    = $this->eid_at;
+					break;
+				case 'dk' :
+					$klarna_secret = $this->secret_dk;
+					$klarna_eid    = $this->eid_dk;
+					break;
+				case 'nl' :
+					$klarna_secret = $this->secret_nl;
+					$klarna_eid    = $this->eid_nl;
+					break;
+				case 'gb' :
+					$klarna_secret = $this->secret_uk;
+					$klarna_eid    = $this->eid_uk;
+					break;
+				case 'us' :
+					$klarna_secret = $this->secret_us;
+					$klarna_eid    = $this->eid_us;
+					break;
+				default:
+					$klarna_secret = '';
+			}
 		}
 		// Process cart contents and prepare them for Klarna
 		if ( isset( $_GET['klarna_order'] ) ) {
@@ -1586,6 +1627,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 			$klarna_to_wc->set_klarna_test_mode( $this->testmode );
 			$klarna_to_wc->set_klarna_debug( $this->debug );
 			$klarna_to_wc->set_klarna_server( $this->klarna_server );
+			$klarna_to_wc->set_klarna_credentials_country( $this->klarna_credentials_country );
 			$klarna_to_wc->listener();
 		}
 	} // End function check_checkout_listener
@@ -1757,26 +1799,43 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 				$klarna_order = new WC_Gateway_Klarna_Order( $order, $klarna );
 				$refund_order = $klarna_order->refund_order( $amount, $reason, $invNo );
 			} elseif ( 'rest' == get_post_meta( $order->id, '_klarna_api', true ) ) {
-				$country = get_post_meta( $orderid, '_billing_country', true );
+				
+				if( get_post_meta( $orderid, '_klarna_credentials_country', true ) ) {
+					$country =  get_post_meta( $orderid, '_klarna_credentials_country', true );
+				} else {
+					$country = get_post_meta( $orderid, '_billing_country', true );
+				}
+				
 				/**
 				 * Need to send local order to constructor and Klarna order to method
 				 */
 				if ( $this->testmode == 'yes' ) {
-					if ( 'gb' == strtolower( $country ) || 'dk' == strtolower( $country ) ) {
+					if ( 'gb' === strtolower( $country ) || 'dk' === strtolower( $country ) || 'nl' === strtolower( $country ) ) {
 						$klarna_server_url = Klarna\Rest\Transport\ConnectorInterface::EU_TEST_BASE_URL;
-					} elseif ( 'us' == strtolower( $country ) ) {
+					} elseif ( 'us' === strtolower( $country ) ) {
 						$klarna_server_url = Klarna\Rest\Transport\ConnectorInterface::NA_TEST_BASE_URL;
 					}
 				} else {
-					if ( 'gb' == strtolower( $country ) || 'dk' == strtolowe( $country ) ) {
+					if ( 'gb' === strtolower( $country ) || 'dk' === strtolower( $country ) || 'nl' === strtolower( $country ) ) {
 						$klarna_server_url = Klarna\Rest\Transport\ConnectorInterface::EU_BASE_URL;
-					} elseif ( 'us' == strtolower( $country ) ) {
+					} elseif ( 'us' === strtolower( $country ) ) {
 						$klarna_server_url = Klarna\Rest\Transport\ConnectorInterface::NA_BASE_URL;
 					}
 				}
-				if ( 'gb' == strtolower( $country ) || 'dk' == strtolower( $country ) ) {
-					$connector = Klarna\Rest\Transport\Connector::create( $this->eid_uk, $this->secret_uk, $klarna_server_url );
-				} elseif ( 'us' == strtolower( $country ) ) {
+				if ( 'gb' === strtolower( $country ) || 'dk' === strtolower( $country ) || 'nl' === strtolower( $country ) ) {
+					if ( 'gb' === strtolower( $country ) ) {
+						$eid = $this->eid_uk;
+						$secret = html_entity_decode( $this->secret_uk );
+					} elseif ( 'dk' === strtolower( $country ) ) {
+						$eid = $this->eid_dk;
+						$secret = html_entity_decode( $this->secret_dk );
+					} elseif ( 'nl' === strtolower( $country ) ) {
+						$eid = $this->eid_nl;
+						$secret = html_entity_decode( $this->secret_nl );
+					}
+
+					$connector = Klarna\Rest\Transport\Connector::create( $eid, $secret, $klarna_server_url );
+				} elseif ( 'us' === strtolower( $country ) ) {
 					$connector = Klarna\Rest\Transport\Connector::create( $this->eid_us, $this->secret_us, $klarna_server_url );
 				}
 				$klarna_order_id = get_post_meta( $orderid, '_klarna_order_id', true );
@@ -1800,7 +1859,7 @@ class WC_Gateway_Klarna_Checkout extends WC_Gateway_Klarna {
 	 * @since  2.0.0
 	 */
 	function is_rest() {
-		if ( 'GB' == $this->klarna_country || 'gb' == $this->klarna_country || 'US' == $this->klarna_country || 'us' == $this->klarna_country || 'DK' == $this->klarna_country || 'dk' == $this->klarna_country ) {
+		if ( in_array( strtoupper( $this->klarna_country ), apply_filters( 'klarna_is_rest_countries', array( 'US', 'DK', 'GB', 'NL' ) ) ) ) {
 			// Set it in session as well, to be used in Shortcodes class
 			WC()->session->set( 'klarna_is_rest', true );
 
@@ -1979,7 +2038,7 @@ class WC_Gateway_Klarna_Checkout_Extra {
 
 	// Set session
 	function start_session() {
-		$data = new WC_Gateway_Klarna_Checkout; // Still need to initiate it here, otherwise shortcode won't work
+		new WC_Gateway_Klarna_Checkout; // Still need to initiate it here, otherwise shortcode won't work
 		// if ( ! is_admin() || defined( 'DOING_AJAX' ) ) {
 		/*
 		$checkout_settings = get_option( 'woocommerce_klarna_checkout_settings' );
@@ -2042,7 +2101,6 @@ class WC_Gateway_Klarna_Checkout_Extra {
 	 **/
 	function change_checkout_url( $url ) {
 		if ( ! is_admin() ) {
-			global $woocommerce;
 			global $klarna_checkout_url;
 			$checkout_settings            = get_option( 'woocommerce_klarna_checkout_settings' );
 			$enabled                      = $checkout_settings['enabled'];
@@ -2237,7 +2295,7 @@ class WC_Gateway_Klarna_Checkout_Extra {
 			$this->authorized_countries[] = 'US';
 		}
 
-		return $this->authorized_countries;
+		return apply_filters( 'klarna_authorized_countries', $this->authorized_countries );
 	}
 
 	/**
@@ -2250,7 +2308,7 @@ class WC_Gateway_Klarna_Checkout_Extra {
 	 */
 	function is_rest() {
 		$this->klarna_country = WC()->session->get( 'klarna_country' );
-		if ( 'GB' == $this->klarna_country || 'gb' == $this->klarna_country || 'US' == $this->klarna_country || 'us' == $this->klarna_country || 'DK' == $this->klarna_country || 'dk' == $this->klarna_country ) {
+		if ( in_array( strtoupper( $this->klarna_country ), apply_filters( 'klarna_is_rest_countries', array( 'US', 'DK', 'GB', 'NL' ) ) ) ) {
 			// Set it in session as well, to be used in Shortcodes class
 			WC()->session->set( 'klarna_is_rest', true );
 

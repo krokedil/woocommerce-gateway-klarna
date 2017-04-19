@@ -1,5 +1,31 @@
 *** WooCommerce Gateway Klarna Changelog ***
 
+2017.04.06  - version 2.3.6
+* Fix       - Fixes problem with $order->get_id() in K2WC class.
+
+2017.04.06  - version 2.3.5
+* Hotfix    - Fixes undeclared global variable from previous version, in get_checkout_page() method.
+
+2017.04.05  - version 2.3.4
+* Fix       - Removes deprecated functions (woocommerce_clean, WC()->cart->get_cart_url(), WC()->cart->get_checkout_url(), woocommerce_get_page_id, get_product)
+* Fix       - Fixes error handling error in WC_Gateway_Klarna_K2WC class.
+* Fix       - Fixes WooCommerce Smart Coupons compatibility where discount amount wasn't being deducted from smart coupon properly.
+
+2017.03.30  - version 2.3.3
+* Fix       - Fixes catchable fatal error on customer creation for KCO.
+* Fix       - Removes order status filtering (causes error with WC 3.0).
+
+2017.03.23  - version 2.3.2
+* Fix       - Fixed compatibility with WooCommerce Min/Max plugin.
+* Fix       - Fixed compatibility with Subscriptions/Memberships combination of plugins.
+* Fix       - Adds support for KCO NL.
+* Fix       - Fixes tax rate calculation in refunds for KCO V2.
+* Fix       - Fixes order total calculation when shipping doesn't have tax for KCO.
+* Fix       - Fixes WooCommerce order total calculation when coupons are used in KCO V3.
+* Fix       - Adds utf8_encode to refund reason.
+* Update    - Adds klarna_is_rest_countries_eu and klarna_is_rest_countries_na filters.
+* Update    - Stores Klarna credentials country as order meta field.
+
 2017.03.06  - version 2.3.1
 * Fix       - Fixes "Can't use method return value in write context" error for PHP <= 5.4 in KCO class.
 
