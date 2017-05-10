@@ -772,6 +772,8 @@ class WC_Gateway_Klarna_K2WC {
 		$payment_method     = $available_gateways['klarna_checkout'];
 
 		$order->set_payment_method( $payment_method );
+		
+		$order->save();
 	}
 
 	/**
