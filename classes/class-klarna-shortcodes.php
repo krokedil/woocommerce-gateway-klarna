@@ -233,6 +233,7 @@ class WC_Gateway_Klarna_Shortcodes {
 			'col'           => '',
 			'order_note'    => '',
 			'hide_columns'  => '',
+			'hide_coupon'  => '',
 			'only_shipping' => ''
 		), $atts );
 
@@ -288,7 +289,7 @@ class WC_Gateway_Klarna_Shortcodes {
 			$atts = WC()->session->get( 'kco_widget_atts' );
 		} else {
 			// Set empty defaults
-			$atts = array( 'order_note' => '', 'hide_columns' => '', 'only_shipping' => '' );
+			$atts = array( 'order_note' => '', 'hide_columns' => '', 'hide_coupon' => '', 'only_shipping' => '' );
 		}
 
 		do_action( 'kco_widget_before_calculation', $atts );
@@ -309,7 +310,9 @@ class WC_Gateway_Klarna_Shortcodes {
 			<?php do_action( 'kco_widget_before_coupon', $atts ); ?>
 
 			<!-- Coupons -->
-			<?php woocommerce_checkout_coupon_form(); ?>
+			<?php if ( 'yes' !== $atts['hide_coupon'] ) { ?>
+				<?php woocommerce_checkout_coupon_form(); ?>
+			<?php } ?>
 
 			<?php do_action( 'kco_widget_before_cart_items', $atts ); ?>
 

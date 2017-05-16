@@ -574,6 +574,29 @@ class WC_Gateway_Klarna_Order {
 			}
 			$klarna = new Klarna();
 			$this->configure_klarna( $klarna, $country, $payment_method );
+
+			// renew the reservation if possible before activating the order
+			try {
+				$klarna->extendExpiryDate($rno);
+				$order->add_order_note( sprintf( __( 'Klarna: Reservation renew success!', 'woocommerce-gateway-klarna' )));
+			} catch ( Exception $e ) {
+				$failurenote = utf8_encode( $e->getMessage() );
+				
+				if (strpos($failurenote, "we cannot approve your purchase ") !== false)
+				{
+					$order->add_order_note( sprintf( __( "Klarna: Can't renew the credit reservation, Klarna will not take the risk", 'woocommerce-gateway-klarna' )));
+				}
+				elseif (strpos($failurenote, "Reservationen som du ") !== false)
+				{
+					// reservation still active, do nothing
+				}
+				else
+				{
+					// uncharted territory
+					$order->add_order_note( sprintf( __( 'Klarna extendExpiryDate failed: %s', 'woocommerce-gateway-klarna' ), utf8_encode( $e->getMessage() )));
+				}
+			}
+			
 			try {
 				$result = $klarna->activate( $rno, null, // OCR Number
 					KlarnaFlags::RSRV_SEND_BY_EMAIL );

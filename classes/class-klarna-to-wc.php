@@ -1009,9 +1009,33 @@ class WC_Gateway_Klarna_K2WC {
 
 			// Confirm local order.
 			$order->calculate_totals( false );
+			
+			// Check if preseasonal sales
+			$preseasonal = false;
+			$mixed = false;
+			$cart_items = $klarna_order['cart']['items']; // V2
+
+			foreach ( $cart_items as $cart_item ) {
+				if ( strpos($cart_item['name'], 'ennakko' ) !== false ) {
+					$preseasonal = true;
+				}
+				elseif ( strpos($cart_item['name'], 'Delivery' ) == false ) {
+					$mixed = true;
+				}
+			}
+			
 			$order->update_status( 'pending' ); // Set status to Pending Payment before completing the order.
+			
 			$order->payment_complete( $klarna_order['reservation'] );
 			delete_post_meta( $order->id, '_kco_incomplete_customer_email' );
+			
+			if ($preseasonal)
+			{
+				if ($mixed)
+					$order->update_status( 'kco-mixed' ); // Set status to Preseason KCO after completing the order.
+				else
+					$order->update_status( 'kco-preseason' ); // Set status to Preseason KCO after completing the order.
+			}
 		}
 
 		return $klarna_order;

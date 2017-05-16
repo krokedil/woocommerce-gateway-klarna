@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: WooCommerce Klarna Gateway v2.0\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2015-12-16 17:57+0100\n"
-"PO-Revision-Date: 2016-01-14 15:10+0200\n"
+"PO-Revision-Date: 2017-02-02 13:44+0200\n"
 "Last-Translator: Niklas Högefjord <info@krokedil.se>\n"
 "Language-Team: \n"
 "Language: fi_FI\n"
@@ -12,7 +12,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "X-Poedit-KeywordsList: __;_e\n"
 "X-Poedit-Basepath: .\n"
-"X-Generator: Poedit 1.8.4\n"
+"X-Generator: Poedit 1.8.11\n"
 "X-Poedit-SearchPath-0: ..\n"
 
 #: ../classes/class-klarna-checkout.php:29
@@ -1280,7 +1280,7 @@ msgstr "Maksa 14 päivän kuluessa"
 #: ../views/public/payment-fields-part-payment.php:158
 #, php-format
 msgid "%s - %s %s/month - %s%s - Start %s"
-msgstr ""
+msgstr "%s - %s %s/kk  - %s%s - Avausmaksu %s"
 
 #: ../views/public/payment-fields-invoice.php:191
 #: ../views/public/payment-fields-part-payment.php:189
@@ -1383,7 +1383,7 @@ msgstr ""
 #: ../views/public/payment-fields-part-payment.php:148
 #, php-format
 msgid "%s - %s %s/month - %s%s"
-msgstr ""
+msgstr "%s - %s %s/kk - %s%s"
 
 #: ../views/public/payment-fields-part-payment.php:178
 msgid "Klarna PClasses seem to be missing. Klarna Part Payment does not work."

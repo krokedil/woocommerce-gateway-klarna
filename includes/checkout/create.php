@@ -71,6 +71,13 @@ if ( ! $this->is_rest() ) {
 
 // Merchant URIs
 $push_uri_base = get_home_url() . '/wc-api/WC_Gateway_Klarna_Checkout/';
+
+// strip WPML tag from push uri
+if (strpos(get_home_url(), '?') !== false)
+{
+	$push_uri_base = substr(get_home_url(), 0, strpos(get_home_url(), '?')) . '/wc-api/WC_Gateway_Klarna_Checkout/';
+}
+
 $order_key = get_post_meta( $local_order_id, '_order_key', true );
 // REST
 if ( $this->is_rest() ) {
@@ -103,13 +110,31 @@ if ( $this->is_rest() ) {
 		'klarna_order' => '{checkout.order.id}',
 		'klarna-api'   => 'v2'
 	), $push_uri_base );
-	$merchant_confirmation_uri = add_query_arg( array(
-		'klarna_order'   => '{checkout.order.id}',
-		'sid'            => $local_order_id,
-		'order-received' => $local_order_id,
-		'thankyou'       => 'yes',
-		'key'            => $order_key
-	), $this->klarna_checkout_thanks_url );
+
+	// add WPML lang parameter to confirmation page if defined
+	if (defined( 'ICL_LANGUAGE_CODE' ))
+	{
+		$lang = ICL_LANGUAGE_CODE;
+	 
+		$merchant_confirmation_uri = add_query_arg( array(
+			'lang'			 => $lang,
+			'klarna_order'   => '{checkout.order.id}',
+			'sid'            => $local_order_id,
+			'order-received' => $local_order_id,
+			'thankyou'       => 'yes',
+			'key'            => $order_key
+		), $this->klarna_checkout_thanks_url );
+	}
+	else
+	{
+		$merchant_confirmation_uri = add_query_arg( array(
+			'klarna_order'   => '{checkout.order.id}',
+			'sid'            => $local_order_id,
+			'order-received' => $local_order_id,
+			'thankyou'       => 'yes',
+			'key'            => $order_key
+		), $this->klarna_checkout_thanks_url );
+	}
 }
 
 // Different format for V3 and V2
