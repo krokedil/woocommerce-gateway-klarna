@@ -239,6 +239,16 @@ function init_klarna_gateway() {
 			}
 		}
 	}
+	
+	// Reduce the stock
+	add_action( 'woocommerce_order_status_kco-incomplete_to_processing_notification', 'wc_klarna_kco_reduce_stock' );
+	function wc_klarna_kco_reduce_stock( $orderid ) {
+		// Payment is complete so reduce stock levels
+		if ( apply_filters( 'woocommerce_payment_complete_reduce_order_stock', ! get_post_meta( $orderid, '_order_stock_reduced', true ), $orderid ) ) {
+			$order = wc_get_order($orderid);
+			$order->reduce_order_stock();
+		}
+	}
 
 }
 
