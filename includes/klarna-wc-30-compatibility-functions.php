@@ -12,8 +12,8 @@
  * @return mixed | WC_Order ID
  */
 function klarna_wc_get_order_id( $order ) {
-	if ( method_exists( $order, 'get_id' ) ) {
-		return $order->get_id();
+	if ( method_exists( $order, 'get_order_number' ) ) {
+		return $order->get_order_number();
 	} else {
 		return $order->id;
 	}
