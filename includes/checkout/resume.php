@@ -101,7 +101,7 @@ try {
 		// Update the order WC id.
 		$kco_country = ( '' !== $kco_session_country ) ? $kco_session_country : $kco_klarna_country;
 		$kco_locale  = ( '' !== $kco_session_locale ) ? $kco_session_locale : $kco_klarna_language;
-		
+
 		if ( $kco_is_rest ) {
 			$kco_currency 	= strtolower( get_woocommerce_currency() );
 			$kco_country 	= strtolower( $kco_country );
@@ -235,7 +235,9 @@ try {
 				$create['options']['allow_separate_shipping_address'] = true;
 			}
 		}
-		krokedil_log_events( $local_order_id, 'Update order', $update );		
+		if ( $klarna_debug == 'yes' ) {
+			krokedil_log_events( $local_order_id, 'Update order', $update );
+		}
 		$klarna_order->update( apply_filters( 'kco_update_order', $update ) );
 	} // End if country change.
 } catch ( Exception $e ) {
