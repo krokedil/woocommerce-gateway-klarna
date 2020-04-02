@@ -38,6 +38,7 @@ class WC_Gateway_Klarna_Cross_Sells {
 
 			ob_start();
 			wc_get_template( 'cart/cross-sells.php', array(
+				'cross_sells'    => array_filter( array_map( 'wc_get_product', WC()->cart->get_cross_sells() ), 'wc_products_array_filter_visible' ),
 				'posts_per_page' => apply_filters( 'klarna_checkout_cross_sells_per_page', 2 ),
 				'columns'        => apply_filters( 'klarna_checkout_cross_sells_columns', 2 ),
 				'orderby'        => apply_filters( 'klarna_checkout_cross_sells_orderby', 'rand' )
